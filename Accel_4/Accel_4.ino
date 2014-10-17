@@ -35,7 +35,8 @@ void setup()
  * Measure as much as the size of xyz array.
 */
 void measure_accleration(){
-  for(int i = 0; i < xyz_size; i++) {
+  int i = 0;
+  for(i = 0; i < xyz_size; i++) {
     xyz[i][0] = analogRead(xpin);
     //add a small delay between pin readings.  I read that you should
     //do this but haven't tested the importance
@@ -49,7 +50,8 @@ void measure_accleration(){
 
 int get_sum(int a){
   int sum = 0;
-  for(int i = 0; i < xyz_size; i++) {
+  int i = 0;
+  for(i = 0; i < xyz_size; i++) {
     sum += xyz[i][a];
   }
   return sum;
@@ -74,7 +76,8 @@ void get_deviation(){
   int z_variance = 0;
   
   // Sum up (each value - Mean)^2
-  for(int i = 0; i < xyz_size; i++) {
+  int i = 0;
+  for(i = 0; i < xyz_size; i++) {
     x_variance += pow(xyz[i][0] - x_mean, 2);
     y_variance += pow(xyz[i][1] - y_mean, 2);
     z_variance += pow(xyz[i][2] - z_mean, 2);
@@ -91,22 +94,35 @@ void get_deviation(){
 }
 
 void print_xyz(){
-  for(int i = 0; i < xyz_size; i++){
+  int i = 0;
+  for(i = 0; i < xyz_size; i++){
     //Serial.print("x: %d  y: %d  z: %d", xyz[i][0], xyz[i][1], xyz[i][2]);
     Serial.print(xyz[i][0]);
+    Serial.print("\t");
+    Serial.print(xyz[i][1]);
+    Serial.print("\t");
+    Serial.print(xyz[i][2]);
+    Serial.print("\n");
   }
 }
 
 /*
  * As a parameter, it gets a 2-d array (I'm using a global variable now)
  * e.g. [(x, y, z), (x2, y2, z2), (x3, y3, z3), (x4, y4, z4)]
- * Get deviation. If deviation < 0.2 then return True.
+ * Get deviation. If deviation < x then return True.
 */
 int is_parked(){
   measure_accleration();
   get_deviation();
   print_xyz();
-  if(xyz_sd[0] + xyz_sd[1] + xyz_sd[2] < 0.2) {
+  Serial.print("Standard Deviation: ");
+  Serial.print(xyz_sd[0]);
+  Serial.print("\t");
+  Serial.print(xyz_sd[1]);
+  Serial.print("\t");
+  Serial.print(xyz_sd[2]);
+  Serial.print("\n");
+  if(xyz_sd[0] + xyz_sd[1] + xyz_sd[2] < 5) {
     return 1;
   }else{
     return 0;
@@ -119,18 +135,20 @@ void loop()
   // i.e. when driving, measure once a minute
   if(is_parked() == 0){
     digitalWrite(green_led, HIGH);
-    delay(100);
+    delay(1000);
     digitalWrite(green_led, LOW);
-    delay(40000);
+    //delay(40000);
     measured_as_parked_once = 0;
+    Serial.print("The car is driving\n");
 
   }else{
     if(measured_as_parked_once == 1){
       // If the car is parked, measure every 4 min.
       digitalWrite(red_led, HIGH);
-      delay(100);
+      delay(1000);
       digitalWrite(red_led, LOW);
-      delay(240000);
+      Serial.print("The car is parked\n");
+      //delay(240000);
     }else{measured_as_parked_once = 1;}
   }
 }

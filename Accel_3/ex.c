@@ -1,8 +1,9 @@
 #include <math.h>
+#include <stdio.h>
 // these constants describe the pins. They won't change:
-const int xpin = A3;                  // x-axis of the accelerometer
-const int ypin = A2;                  // y-axis
-const int zpin = A1;                  // z-axis (only on 3-axis models)
+//const int xpin = A3;                  // x-axis of the accelerometer
+//const int ypin = A2;                  // y-axis
+//const int zpin = A1;                  // z-axis (only on 3-axis models)
 
 const int red_led = 12;
 const int green_led = 13;
@@ -14,38 +15,19 @@ float xyz_sd[3] = {0};
 // Parking-sleep mode starts when it's measured twice in a row
 int measured_as_parked_once = 0; 
 
-void setup()
-{
-  // initialize the serial communications:
-  Serial.begin(9600);
-
-  //Make sure the analog-to-digital converter takes its reference voltage from
-  // the AREF pin
-  analogReference(EXTERNAL);
-
-  pinMode(xpin, INPUT);
-  pinMode(ypin, INPUT);
-  pinMode(zpin, INPUT);
-  pinMode(green_led, OUTPUT);
-  pinMode(red_led, OUTPUT);
-}
-
-/*
- * Measure accleration once a sec.
- * Measure as much as the size of xyz array.
-*/
-void measure_accleration(){
-  for(int i = 0; i < xyz_size; i++) {
-    xyz[i][0] = analogRead(xpin);
-    //add a small delay between pin readings.  I read that you should
-    //do this but haven't tested the importance
-    delay(1);
-    xyz[i][1] = analogRead(ypin);
-    delay(1);
-    xyz[i][2] = analogRead(zpin);
-    delay(1000);
+void update_xyz(x, y, z){
+  // Scoot over to the front
+  for(int i = 1; i < xyz_size; i++){
+    for(int j = 0; j < 3; j++){
+      xyz[i - 1][j] = xyz[i][j];
+    }
   }
+  // Add the new one in the end
+  xyz[19][0] = x;
+  xyz[19][1] = y;
+  xyz[19][2] = z;
 }
+
 
 int get_sum(int a){
   int sum = 0;
@@ -90,22 +72,13 @@ void get_deviation(){
   xyz_sd[2] = sqrt(z_variance);
 }
 
-void print_xyz(){
-  for(int i = 0; i < xyz_size; i++){
-    //Serial.print("x: %d  y: %d  z: %d", xyz[i][0], xyz[i][1], xyz[i][2]);
-    Serial.print(xyz[i][0]);
-  }
-}
-
 /*
  * As a parameter, it gets a 2-d array (I'm using a global variable now)
  * e.g. [(x, y, z), (x2, y2, z2), (x3, y3, z3), (x4, y4, z4)]
  * Get deviation. If deviation < 0.2 then return True.
 */
 int is_parked(){
-  measure_accleration();
   get_deviation();
-  print_xyz();
   if(xyz_sd[0] + xyz_sd[1] + xyz_sd[2] < 0.2) {
     return 1;
   }else{
@@ -113,31 +86,54 @@ int is_parked(){
   }
 }
 
-void loop()
-{
+void print_xyz(){
+  for(int i = 0; i < xyz_size; i++) {
+    for(int j = 0; j < 3; j++){
+      printf("%d ", xyz[i][j]);
+    }
+    printf("\n");
+  }
+}
+
+void arduino_loop(){
   // If the car is driving, wait for 40 seconds
   // i.e. when driving, measure once a minute
   if(is_parked() == 0){
-    digitalWrite(green_led, HIGH);
-    delay(100);
-    digitalWrite(green_led, LOW);
     delay(40000);
     measured_as_parked_once = 0;
-
   }else{
     if(measured_as_parked_once == 1){
       // If the car is parked, measure every 4 min.
-      digitalWrite(red_led, HIGH);
-      delay(100);
-      digitalWrite(red_led, LOW);
       delay(240000);
     }else{measured_as_parked_once = 1;}
   }
 }
 
+int main() {
+
+  for(int i = 0; i < xyz_size; i++){
+    xyz[i][0] = i;
+    xyz[i][1] = i*5;
+    xyz[i][2] = i*10;    
+  }
+
+  print_xyz();
+  printf("\n");
+
+  get_deviation();
+  printf("x: %f, y: %f, z: %f\n", xyz_sd[0], xyz_sd[1], xyz_sd[2]);
+  printf("\n");
+
+  printf("Is the car parked?\n");
+  if(is_parked() == 1){
+    printf("Yes\n");
+  }else{
+    printf("No, it's driving.\n");
+  }
 
 
-
+  return 0;
+}
 
 
 
