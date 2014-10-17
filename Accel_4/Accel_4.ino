@@ -12,7 +12,7 @@ int xyz[xyz_size][3] = {0};
 // 3-element Array for standard deviation
 float xyz_sd[3] = {0};
 // Parking-sleep mode starts when it's measured twice in a row
-int measured_as_parked_once = 0; 
+int measured_as_parked_once = 1; 
 
 void setup()
 {
@@ -122,7 +122,7 @@ int is_parked(){
   Serial.print("\t");
   Serial.print(xyz_sd[2]);
   Serial.print("\n");
-  if(xyz_sd[0] + xyz_sd[1] + xyz_sd[2] < 5) {
+  if(xyz_sd[0] + xyz_sd[1] + xyz_sd[2] < 30) {
     return 1;
   }else{
     return 0;
@@ -134,13 +134,20 @@ void loop()
   // If the car is driving, wait for 40 seconds
   // i.e. when driving, measure once a minute
   if(is_parked() == 0){
+    /* Parker might have been moved by accident.
+     * Don't turn on the driving mode yet.
+     * Check once more. */
+    if(measured_as_parked_once == 1){
+      measured_as_parked_once = 0;
+      Serial.print("The car seems to be driving\n Check once again\n");
+    }else{
     digitalWrite(green_led, HIGH);
     delay(1000);
     digitalWrite(green_led, LOW);
     //delay(40000);
-    measured_as_parked_once = 0;
+    
     Serial.print("The car is driving\n");
-
+    }
   }else{
     if(measured_as_parked_once == 1){
       // If the car is parked, measure every 4 min.
@@ -149,7 +156,11 @@ void loop()
       digitalWrite(red_led, LOW);
       Serial.print("The car is parked\n");
       //delay(240000);
-    }else{measured_as_parked_once = 1;}
+    }else{
+      measured_as_parked_once = 1;
+      Serial.print("The car seems to be parked\n");
+      Serial.print("Check once again\n");
+    }
   }
 }
 
