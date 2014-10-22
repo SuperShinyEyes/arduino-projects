@@ -183,6 +183,10 @@ void do_once_when_parked(int h, int m){
   servo.detach(); // Turn off the servo
 }
 
+void check_capacity(){}
+
+void set_rtc_time(){}
+
 void loop(){
 
   DateTime now = RTC.now();
@@ -203,7 +207,9 @@ void loop(){
       measured_as_parked_once = 0;
       Serial.print("The car seems to be driving\n Check once again\n");
     }else{
+      // Set the variable so the time can be newly set when parked again
       time_has_set = false;
+      // Turn on the green light
       led_control(0, 255, 0);
       delay(1000);
       //delay(40000);
@@ -212,11 +218,11 @@ void loop(){
     }
   }else{
     if(measured_as_parked_once == 1){
-      // If the car is parked, measure every 4 min.      
+      // Set the time only once when the car has parked.
       if(time_has_set == false) do_once_when_parked(now.hour(), now.minute());
       delay(1000);
       Serial.print("The car is parked\n");
-      
+      // If the car is parked, measure every 4 min.      
       //delay(240000);
     }else{
       measured_as_parked_once = 1;
