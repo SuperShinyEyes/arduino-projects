@@ -144,7 +144,7 @@ boolean is_parked(){
   Serial.print("\t");
   Serial.print(xyz_sd[2]);
   Serial.print("\n");
-  if(xyz_sd[0] + xyz_sd[1] + xyz_sd[2] < 30) {
+  if(xyz_sd[0] + xyz_sd[1] + xyz_sd[2] < 5) {
     return true;
   }else{
     return false;
