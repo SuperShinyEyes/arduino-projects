@@ -33,14 +33,19 @@ At 24:00 new day starts and Red LED goes on.
 
 RTClib RTC;
 
-char ch;
-int Contrast=15;
 #define lcdBacklightButton 8
-#define medicineButton 13
+#define medicineButton 10
 #define redLed 7
 #define greenLed 13
 
+bool isLcdOn = false;
+bool tookMedicine = false;
+char ch;
+int Contrast=15;
+
 int lcdBacklightButtonState = 0;
+int medicineButtonState = 0;
+
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
@@ -58,15 +63,87 @@ void setup()
   // Print a message to the LCD.
   lcd.print("Had medicine @");
 
-  digitalWrite(greenLed, HIGH);
+  //digitalWrite(greenLed, HIGH);
   digitalWrite(redLed, HIGH);
+}
+
+char *numberToMonth(int m){
+  switch (m) {
+    case 1:
+      return "Jan";
+      break;
+
+    case 11:
+      return "Nov";
+      break;
+
+    case 12:
+      return "Dec";
+      break;
+
+    default:
+      return "???";
+      break;
+  }
+}
+
+char *numberToDay(int d){
+  switch (d) {
+    case 1:
+      return "Mon";
+      break;
+
+    case 2:
+      return "Tue";
+      break;
+
+    case 3:
+      return "Wed";
+      break;
+
+
+    case 4:
+      return "Thu";
+      break;
+
+    case 5:
+      return "Fri";
+      break;
+
+    case 6:
+      return "Sat";
+      break;
+
+    case 7:
+      return "Sun";
+      break;
+
+    default:
+      return "???";
+      break;
+  }
 }
 
 void writeTime(){
   DateTime now = RTC.now();
+
+  char *monthChar = numberToMonth(now.month());
+  char *dayChar = numberToDay(now.dayOfWeek());
+
   lcd.setCursor(0, 0);
+  lcd.print("Took medicine");
+  // Display time
+  lcd.setCursor(0, 1);
+  //lcd.print(now.month(), DEC);
+  lcd.print(monthChar);
+  lcd.print(".");
+  lcd.print(now.day(), DEC);
+  lcd.print(".");
+  lcd.print(dayChar);
+  lcd.print(" ");
   lcd.print(now.hour(), DEC);
-  Serial.print(now.hour(), DEC);
+  lcd.print(":");
+  lcd.print(now.minute(), DEC);
 }
 
 void onBoardLedDebug(){
@@ -76,30 +153,27 @@ void onBoardLedDebug(){
 }
 
 void loop() 
-{
-  DateTime now = RTC.now();
-  
+{ 
   lcdBacklightButtonState = digitalRead(lcdBacklightButton);
-
+  medicineButtonState = digitalRead(medicineButton);
+  
+  if(medicineButtonState == HIGH){
+    if(tookMedicine == false){
+      tookMedicine = true;
+      writeTime();
+      digitalWrite(redLed, LOW);
+      digitalWrite(greenLed, HIGH);
+    }
+    analogWrite(9,28836);  // Brightens LCD
+    delay(3000);
+    analogWrite(9,0);
+  }
+  
   // set the cursor to column 0, line 1
   // (note: line 1 is the second row, since counting begins with 0):
   lcd.setCursor(0, 1);
   // print the number of seconds since reset:
-  lcd.print(now.month(), DEC);
-  lcd.print(".");
-  lcd.print(now.day(), DEC);
-  lcd.print(".");
-  lcd.print(now.hour(), DEC);
-  //lcd.setCursor(2, 1);
-  lcd.print(":");
-  //lcd.setCursor(3, 1);
-  lcd.print(now.minute(), DEC);
-  if(lcdBacklightButtonState == HIGH){
-    //writeTime();
-    Serial.println("Clicked!");
-    analogWrite(9,28836);
-    delay(100);
-  }
+
   
 }
 

@@ -16,3 +16,14 @@ void loop(){
 		delay(10);
 	}
 }
+
+void loop() {
+  buttonState = DigitalRead(buttonPin);
+  if(buttonState == HIGH){
+		digitalWrite(led, HIGH);
+		delay(100);
+	}else{
+		digitalWrite(led, LOW);
+		delay(100);
+	}
+}
