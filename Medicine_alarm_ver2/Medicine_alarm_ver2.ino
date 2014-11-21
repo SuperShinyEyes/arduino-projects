@@ -72,6 +72,42 @@ char *numberToMonth(int m){
       return "Jan";
       break;
 
+    case 2:
+      return "Feb";
+      break;
+
+    case 3:
+      return "Mar";
+      break;
+
+    case 4:
+      return "Apr";
+      break;
+
+    case 5:
+      return "May";
+      break;
+
+    case 6:
+      return "Jun";
+      break;
+
+    case 7:
+      return "Jul";
+      break;
+
+    case 8:
+      return "Aug";
+      break;
+
+    case 9:
+      return "Sep";
+      break;
+
+    case 10:
+      return "Oct";
+      break;
+
     case 11:
       return "Nov";
       break;
@@ -185,7 +221,8 @@ void loop()
   }
 
   medicineButtonState = digitalRead(medicineButton);
-  
+  lcdBacklightButtonState = digitalRead(lcdBacklightButton);
+
   if(medicineButtonState == HIGH){
     if(tookMedicine == false){
       tookMedicine = true;
@@ -193,6 +230,11 @@ void loop()
       digitalWrite(redLed, LOW);
       digitalWrite(greenLed, HIGH);
     }
+    analogWrite(9,28836);  // Brightens LCD
+    delay(6000);
+    analogWrite(9,0);
+  }
+  if(lcdBacklightButtonState == HIGH){
     analogWrite(9,28836);  // Brightens LCD
     delay(6000);
     analogWrite(9,0);
