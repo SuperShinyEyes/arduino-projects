@@ -47,7 +47,7 @@ int lcdBacklightButtonState = 0;
 int medicineButtonState = 0;
 
 // initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+LiquidCrystal lcd(12, 11, 5, 4, A3, A2);
 
 void setup() {
   Wire.begin();
@@ -171,7 +171,6 @@ void writeTime(){
   lcd.print("Took medicine @");
   // Display time
   lcd.setCursor(0, 1);
-  //lcd.print(now.month(), DEC);
   lcd.print(monthChar);
   lcd.print(".");
   lcd.print(now.day(), DEC);

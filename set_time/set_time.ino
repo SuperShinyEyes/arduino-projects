@@ -22,13 +22,15 @@ byte Second = 0;
 
 #define downButton 0
 #define upButton 1
-#define posButton 8
+#define lcd_clockButton 8
 
 int upButtonState = 0;
 int downButtonState = 0;
-int posButtonState = 0;
-int pos = 0;
+int lcd_clockButtonState = 0;  // Controls both lcd and clock
+int clockBoxIndex = 0;
 byte clockBox = {Month, Date, Dow, Hour, Minute};
+
+LiquidCrystal lcd(12, 11, 5, 4, A3, A2);
 
 void setup() {
 	// Start the serial port
@@ -37,15 +39,46 @@ void setup() {
 	pinMode(downButton, INPUT);
 	pinMode(upButton, INPUT);
 	pinMode(posButton, INPUT);
-
+	analogWrite(6,Contrast);
+	lcd.begin(16, 2);
+	lcd.print("Hi!");
 	// Start the I2C interface
 	Wire.begin();
 }
 
+void changeTime(){
+	while(clockBoxIndex < 5){
+		upButtonState = digitalRead(upButton);
+		downButtonState = digitalRead(downButton);
+		lcd_clockButtonState = digitalRead(lcd_clockButton);
+		if(upButtonState == HIGH){
+			clockBox[clockBoxIndex]++;
+		}else if(downButtonState == HIGH){
+			clockBox[clockBoxIndex]--;
+		}else if(lcd_clockButtonState== HIGH){
+			clockBoxIndex++;
+		}
+
+		Clock.setClockMode(false);
+		switch(clockBoxIndex){
+			case 0:
+				Clock.setMonth(Month)	
+		}
+	}
+}
+
 void loop() {
 
-	upButtonState = digitalRead(upButton);
-	downButtonState = digitalRead(downButton);
+	lcd_clockButtonState = digitalRead(lcd_clockButton);
+
+	if(lcd_clockButtonState == HIGH){
+		analogWrite(9,28836);
+		delay(2000);
+		if(lcd_clockButtonState == HIGH){
+			changeTime();
+		}
+		analogWrite(9,0);
+	}
 
 	if(upButtonState == HIGH){
 
