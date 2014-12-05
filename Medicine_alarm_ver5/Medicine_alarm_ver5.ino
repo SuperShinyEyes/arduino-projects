@@ -27,6 +27,7 @@ After 5 sec, LCD dims.
 
 At 24:00 new day starts and Red LED goes on.
 */
+#include <stdarg.h>
 #include <LiquidCrystal.h>
 #include <Wire.h>
 #include "DS3231.h"
@@ -201,16 +202,17 @@ void writeTime(){
     lcd.print(0);
   }
   lcd.print(m, DEC);
+  lcd.print(" ");
 }
 int *getTimeArray(){
-	DateTime now;
+	DateTime now = RTC.now();
 	static int timeArray[5] = {0};
 	timeArray[0] = now.month();
 	timeArray[1] = now.day();
 	timeArray[2] = now.dayOfWeek();
 	timeArray[3] = now.hour();
 	timeArray[4] = now.minute();
-	
+	//Serial.print("Month: %d, Day: %d, DoW: %d, Hour: %d, Min: %d\n", timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4]);
 	return timeArray;
 }
 
@@ -243,7 +245,7 @@ void change(int currentTime, int threshold, char *timeUnit, void (DS3231::*setFu
 }
 
 int getDateThreshold(){
-	DateTime now;
+	DateTime now = RTC.now();
 	int m = now.month();
 	int y = now.year();
 	Serial.print("m original: ");
@@ -263,7 +265,8 @@ void changeTime(){
 	Clock.setClockMode(false);	// set to 24h
 	
 	int *timeArray = getTimeArray();
-
+	Serial.println("Outside");
+	//Serial.print("Month: %d, Day: %d, DoW: %d, Hour: %d, Min: %d\n", timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4]);
 	change(timeArray[0], 12, "month", &DS3231::setMonth, Clock);
 	int dateThreshold = getDateThreshold();
 	
@@ -335,6 +338,8 @@ void loop() {
   	lcdBacklightOnTime = 500;
   	pressedTime++;
   	if(pressedTime > 100){
+  		lcd.setCursor(0, 0);
+  		lcd.print("                ");
   		changeTime();
   		
   		pressedTime = 0;
