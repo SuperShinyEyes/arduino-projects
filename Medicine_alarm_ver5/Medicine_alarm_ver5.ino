@@ -191,7 +191,7 @@ void writeTime(){
   lcd.print(".");
   lcd.print(dayChar);
   lcd.print(" ");
-  int h = now.hour();
+  uint8_t h = now.hour();
   if(h < 10){
     lcd.print(0);
   }
@@ -272,7 +272,7 @@ void changeTime(){
 	
 	change(timeArray[1], dateThreshold, "date ", &DS3231::setDate, Clock);
 	change(timeArray[2], 7, "day  ", &DS3231::setDoW, Clock);
-	change(timeArray[3], 12, "hour ", &DS3231::setHour, Clock);
+	change(timeArray[3], 24, "hour ", &DS3231::setHour, Clock);
 	change(timeArray[4], 59, "minute", &DS3231::setMinute, Clock);
 	
 }
