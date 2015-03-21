@@ -44,7 +44,6 @@ DS3231 Clock;
 #define greenLed 13
 
 // Constants
-char ch;
 int Contrast=15;
 
 int lcdBacklightButtonState = 0;
@@ -55,7 +54,6 @@ int lcdBacklightOnTime = 0;
 int ledControlArg = 0;
 int medicineHistory[2][5] = {0};
 
-bool changeTimeDone = false;
 bool yesterdayMedicine = true;  // Did you take your medicine last night?
 bool todayMedicine = false;     // Have you taken your medicine today?
 bool isNewDay_ = false;
@@ -314,7 +312,7 @@ int getDateThreshold(){
 	else{ return 30; }
 }
 
-void change(int currentTime, int threshold, char *timeUnit, void (DS3231::*setFunction)(byte), DS3231& c){
+void changeSingleTimeUnit(int currentTime, int threshold, char *timeUnit, void (DS3231::*setFunction)(byte), DS3231& c){
 	int i = currentTime;
 	lcd.setCursor(0,0);
 	lcd.print("Set ");
@@ -325,16 +323,12 @@ void change(int currentTime, int threshold, char *timeUnit, void (DS3231::*setFu
 			if(i == 23 && threshold == 23){ i = 0; Serial.println("jump!");}
 			else if(i < 59){ i = i % threshold + 1; Serial.println("norm");}
 			else{ i = 0;}
-			Serial.print("i: ");
-			Serial.println(i);
 			(c.*setFunction)(i);
 			delay(200); // Don't make it smaller than 200. It might malfunction
 		}else if(!digitalRead(downButton)){
 			i--;
 			if((threshold == 59 || threshold == 23) && i == 0){ i = 0; }
-			else if(i <= 0){i = threshold;}
-			Serial.print("i: ");
-			Serial.println(i);			
+			else if(i <= 0){i = threshold;}		
 			(c.*setFunction)(i);
 			delay(200);
 		}
@@ -347,14 +341,14 @@ void change(int currentTime, int threshold, char *timeUnit, void (DS3231::*setFu
 
 void changeTime(){
 	int *timeArray = getTimeArray();
-	change(timeArray[0], 12, "month", &DS3231::setMonth, Clock);
+	changeSingleTimeUnit(timeArray[0], 12, "month", &DS3231::setMonth, Clock);
 	// Number of days is different depending on months
 	// Feb => 28 or 29. March => 31.
 	int dateThreshold = getDateThreshold();
-	change(timeArray[1], dateThreshold, "date ", &DS3231::setDate, Clock);
-	change(timeArray[2], 7, "day  ", &DS3231::setDoW, Clock);
-	change(timeArray[3], 23, "hour ", &DS3231::setHour, Clock);
-	change(timeArray[4], 59, "minute", &DS3231::setMinute, Clock);
+	changeSingleTimeUnit(timeArray[1], dateThreshold, "date ", &DS3231::setDate, Clock);
+	changeSingleTimeUnit(timeArray[2], 7, "day  ", &DS3231::setDoW, Clock);
+	changeSingleTimeUnit(timeArray[3], 23, "hour ", &DS3231::setHour, Clock);
+	changeSingleTimeUnit(timeArray[4], 59, "minute", &DS3231::setMinute, Clock);
 }
 
 bool isNewDay(){

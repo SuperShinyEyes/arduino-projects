@@ -66,7 +66,7 @@ void measure_accleration(){
     xyz[i][1] = analogRead(ypin);
     delay(1);
     xyz[i][2] = analogRead(zpin);
-    delay(1000);
+    delay(100);
   }
 }
 
@@ -157,11 +157,11 @@ boolean is_parked(){
  * Sets the clock to 6:25
 */
 void set_servo_time(int h, int m){
-  int cur_time = floor(170.0 / (24 * 60) * (h * 60 + m));
+  int cur_time = floor(175.0 / (24 * 60) * (h * 60 + m));
   Serial.print("Current angle:");
   Serial.print(cur_time);
   Serial.print("\n");
-  servo.write(170 - cur_time);
+  servo.write( 175 - cur_time );
 }
 
 void led_control(int red_value, int green_value, int blue_value){
@@ -231,22 +231,3 @@ void loop(){
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
